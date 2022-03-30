@@ -23,27 +23,28 @@ def feature_normalize(data):
     return data
 
 
-# -----------------------------------------------导入样本和标签----------------------------------------------------
-bvp_af = load('Dataset/bvp_af_sum_tip.mat')
-label_af = load('Dataset/label_af_tip.mat')
-bvp_nor = load('Dataset/bvp_nor_sum_tip.mat')
-label_nor = load('Dataset/label_nor_tip.mat')
-PPG = np.append(bvp_af['bvp_af_sum_tip'], bvp_nor['bvp_nor_sum_tip'], axis=0)
-PPG = feature_normalize(PPG)  # 训练样本
-VPPG = PPG + 4 * np.random.rand(PPG.shape[0], PPG.shape[1])
+# -----------------------------------------------load data and labels----------------------------------------------------
+PPG_mat = load('Dataset/PPG.mat')
+PPG = PPG_mat['PPG']
+VPPG = load('Dataset/VPPG.mat')
+VPPG = VPPG_mat['VPPG']
+Label_mat = load('Dataset/label.mat')
+Label = PPG_mat['label']
+
+PPG = feature_normalize(PPG)
 PPG = np.expand_dims(PPG, axis=-1)
 PPG = np.expand_dims(PPG, axis=1)
 PPG = PPG.astype(np.float32)
+VPPG = feature_normalize(VPPG)
 VPPG = np.expand_dims(VPPG, axis=-1)
 VPPG = np.expand_dims(VPPG, axis=1)
 VPPG = VPPG.astype(np.float32)
-Label = np.append(label_af['label_af_tip'], label_nor['label_nor_tip'], axis=0)  # 标签
 Label = np.array(tf.squeeze(tf.one_hot(Label, 2)))
 
-BATCH_SIZE = 72
-BUFFER_SIZE = 1440
+# BATCH_SIZE = 72
+# BUFFER_SIZE = 72
 datasets = tf.data.Dataset.from_tensor_slices(np.append(PPG, VPPG, axis=1))
-datasets = datasets.shuffle(BUFFER_SIZE).batch(BATCH_SIZE)
+# datasets = datasets.shuffle(BUFFER_SIZE).batch(BATCH_SIZE)
 
 spa = 1
 tem = 600
@@ -173,7 +174,7 @@ def generate_plot_image(gen_model, test_noise):
     plt.show()
 
 
-EPOCHS = 10  # 训练100次
+EPOCHS = 1000  # 训练1000次
 num_exp_to_generate = 16  # 生成16张图片
 seed = tf.random.normal([num_exp_to_generate, tem])  # 16组随机数组，每组含100个随机数，用来生成16张图片。
 
